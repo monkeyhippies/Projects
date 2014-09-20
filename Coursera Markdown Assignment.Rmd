@@ -1,0 +1,107 @@
+#Reproducibility Assignment
+
+##Cleaning Up Data
+
+First, I read in the data and changed the dates to class Date.
+
+```{r}
+setwd("C:/Users/Michael/Documents")
+data=read.csv("activity.csv")
+data$date=as.Date(data$date,"%Y-%m-%d")
+data[,"Index"]=1:nrow(data)
+data$day=weekdays(data$date)
+```
+
+##Question 1
+
+Here is a barplot of total number of steps by day
+```{r}
+sums=with(data,tapply(steps,date,sum,na.rm=TRUE))
+barplot(sums,names.arg=names(sums),main="Total Number of Steps By Day",ylab="Number of Steps",xlab="Date")
+```
+
+I then calculated the mean and median over all days.
+```{r}
+medians=median(sums,na.rm=TRUE)
+means=mean(sums,na.rm=TRUE)
+means
+medians
+```
+Mean was `r means` and median was `r medians`.
+
+##Question 2
+
+Here, I plot Steps for each 5 minute interval.
+```{r}
+means5min=with(data,tapply(steps,interval,mean,na.rm=TRUE))
+means5min=data.frame("interval"=names(means5min),"means"=means5min)
+plot(means5min$interval,means5min$means,main="Average Number of Steps By 5 Min. Interval",ylab="Average Number of Steps",xlab="Time Interval",type="l")
+```
+
+I found the interval with maximum steps.
+```{r}
+max_interval=which(means5min$means==max(means5min$means),arr.ind=TRUE)
+max=as.numeric(as.character(means5min[max_interval,"interval"]))
+max
+```
+The maximum interval was `r max`.
+
+##Question 3
+
+I counted the number of rows with NAs
+```{r}
+NAcount=sum(!complete.cases(data))
+NAcount
+```
+
+The number of NAs was `r NAcount`
+
+Here, I created a new dataset with the NA's replaced by the average steps averaged over each interval.
+```{r}
+data2=merge(data,means5min,id="interval")
+data2=data2[order(data2$Index),]
+data2$steps=ifelse(is.na(data2$steps),data2$means,data2$steps)
+```
+
+Then, I created a plot of total steps for each day, with the new data.
+```{r}
+sums2=with(data2,tapply(steps,date,sum,na.rm=TRUE))
+barplot(sums2,names.arg=names(sums2),main="Total Number of Steps By Day",ylab="Number of Steps",xlab="Date")
+```
+
+
+I calculated the mean and median over each day with the new data.
+```{r}
+medians2=median(sums2)
+means2=mean(sums2)
+medians2
+means2
+```
+The new median was `r medians2` and the new mean was `r means2`.  Although median didn't change too much, the mean did change by around 10%.
+
+##Question 4
+
+
+I created a new factor variable in my new dataset to differentiate between weekend and weekday data
+```{r}
+data2[,"day"]=ifelse(data2[,"day"] %in% c("Sunday","Saturday"),"Weekend","Weekday")
+data2$factor=factor(data2$day)
+```
+
+I created a panel plotting Steps over each 5 minute interval.  I separated the weekend and weekday data first...
+```{r}
+weekdays=subset(data2,data2$day %in% "Weekday")
+weekends=subset(data2,data2$day %in% "Weekend")
+Weekday5min=with(weekdays,tapply(steps,interval,mean,na.rm=TRUE))
+Weekday5min=data.frame("interval"=names(Weekday5min),"means"=Weekday5min)
+Weekend5min=with(weekends,tapply(steps,interval,mean,na.rm=TRUE))
+Weekend5min=data.frame("interval"=names(Weekend5min),"means"=Weekend5min)
+
+```
+
+Then I plotted the data shown below.
+```{r}
+par(mfrow=c(1,2))
+plot(Weekday5min$interval,Weekday5min$means,main="Weekday: Average Number of Steps By 5 Min. Interval",ylab="Average Number of Steps",xlab="Time Interval",type="l")
+plot(Weekend5min$interval,Weekend5min$means,main="Weekend: Average Number of Steps By 5 Min. Interval",ylab="Average Number of Steps",xlab="Time Interval",type="l")
+```
