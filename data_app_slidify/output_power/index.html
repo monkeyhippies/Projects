@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Statistical Power App</title>
+  <meta charset="utf-8">
+  <meta name="description" content="Statistical Power App">
+  <meta name="author" content="Me">
+  <meta name="generator" content="slidify" />
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta http-equiv="X-UA-Compatible" content="chrome=1">
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/default.css" media="all" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/phone.css" 
+    media="only screen and (max-device-width: 480px)" >
+  <link rel="stylesheet" href="libraries/frameworks/io2012/css/slidify.css" >
+  <link rel="stylesheet" href="libraries/highlighters/highlight.js/css/tomorrow.css" />
+  <base target="_blank"> <!-- This amazingness opens all links in a new tab. -->  <link rel=stylesheet href="./assets/css/ribbons.css"></link>
+
+  
+  <!-- Grab CDN jQuery, fall back to local if offline -->
+  <script src="http://ajax.aspnetcdn.com/ajax/jQuery/jquery-1.7.min.js"></script>
+  <script>window.jQuery || document.write('<script src="libraries/widgets/quiz/js/jquery.js"><\/script>')</script> 
+  <script data-main="libraries/frameworks/io2012/js/slides" 
+    src="libraries/frameworks/io2012/js/require-1.0.8.min.js">
+  </script>
+  
+  
+
+</head>
+<body style="opacity: 0">
+  <slides class="layout-widescreen">
+    
+    <!-- LOGO SLIDE -->
+        <slide class="title-slide segue nobackground">
+  <hgroup class="auto-fadein">
+    <h1>Statistical Power App</h1>
+    <h2>Calculate Your Power!</h2>
+    <p>Me<br/>unemployed</p>
+  </hgroup>
+  <article></article>  
+</slide>
+    
+
+    <!-- SLIDES -->
+    <slide class="" id="slide-1" style="background:;">
+  <hgroup>
+    <h2>Statistical Power App</h2>
+  </hgroup>
+  <article data-timings="">
+    <ul>
+<li>Use this app if you want to calculate the power of your experiment.</li>
+<li>You can also use this app to get a ballpark estimate of how many observations         you need to take, given a preferred statistical power, alpha, and estimated sigma.</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>Step 1: Input your data</h2>
+  </hgroup>
+  <article data-timings="">
+    <ol>
+<li>Number of Observations</li>
+<li>alpha </li>
+<li>sigma (this is the population standard deviation) </li>
+<li>Estimated Detectable difference (in means of 2 Competing Hypotheses)</li>
+</ol>
+
+<h2>Output on Main Panel</h2>
+
+<ul>
+<li>Calculated Power</li>
+<li>A plot showing the distributions of the two hypotheses and a line marking alpha</li>
+<li>Your input parameters</li>
+</ul>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h3>Demo Inputs and Demo App Screen:</h3>
+  </hgroup>
+  <article data-timings="">
+    <ol>
+<li>Number of Observations: 100</li>
+<li>alpha : .05</li>
+<li>sigma : 1 </li>
+<li>Estimated Detectable difference : .1</li>
+</ol>
+
+<p><img src="assets/fig/unnamed-chunk-1.png" alt="plot of chunk unnamed-chunk-1"> </p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+<slide class="class" id="id" style="background:;">
+  <hgroup>
+    <h2>Some R code Behind the App</h2>
+  </hgroup>
+  <article data-timings="">
+    <pre><code class="r">output_power=function(alpha,factor){
+        power=1-pnorm(qnorm(1-alpha)-factor)
+        return(power)
+}
+
+alpha=.05
+delta_mu=.1
+sigma=1
+n_observations=100
+factor=delta_mu/(sigma/sqrt(n_observations))
+power=output_power(alpha,factor)
+
+y=delta_mu/(sigma/sqrt(n_observations))
+x=seq(-abs(y)*.5,abs(y)*1.5,length.out=100)
+</code></pre>
+
+<h3>Power:</h3>
+
+<p>0.2595</p>
+
+<pre><code>## Warning: plot type &#39;ln&#39; will be truncated to first character
+</code></pre>
+
+<p><img src="assets/fig/unnamed-chunk-3.png" alt="plot of chunk unnamed-chunk-3"> 
+Hope you enjoy this application.</p>
+
+  </article>
+  <!-- Presenter Notes -->
+</slide>
+
+    <slide class="backdrop"></slide>
+  </slides>
+  <div class="pagination pagination-small" id='io2012-ptoc' style="display:none;">
+    <ul>
+      <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=1 title='Statistical Power App'>
+         1
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=2 title='Step 1: Input your data'>
+         2
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=3 title='Demo Inputs and Demo App Screen:'>
+         3
+      </a>
+    </li>
+    <li>
+      <a href="#" target="_self" rel='tooltip' 
+        data-slide=4 title='Some R code Behind the App'>
+         4
+      </a>
+    </li>
+  </ul>
+  </div>  <!--[if IE]>
+    <script 
+      src="http://ajax.googleapis.com/ajax/libs/chrome-frame/1/CFInstall.min.js">  
+    </script>
+    <script>CFInstall.check({mode: 'overlay'});</script>
+  <![endif]-->
+</body>
+  <!-- Load Javascripts for Widgets -->
+  
+  <!-- LOAD HIGHLIGHTER JS FILES -->
+  <script src="libraries/highlighters/highlight.js/highlight.pack.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <!-- DONE LOADING HIGHLIGHTER JS FILES -->
+   
+  </html>

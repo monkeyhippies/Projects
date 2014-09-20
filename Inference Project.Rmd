@@ -1,0 +1,118 @@
+#Inference Project
+
+##Question 1
+
+Here's the simulation code.
+
+```{r}
+lambda=.2
+m=1000
+n=40
+means=numeric(m)
+set.seed(1)
+for (i in 1:m){
+means[i]=mean(rexp(n,lambda))
+}
+```
+
+###Compare Theoretical and Simulation Means
+
+The simulation median is shown below:
+```{r}
+median(means)
+```
+
+The theoretical median is 1/lambda or 5, so we can see that the simulation and theoretical values match up well.
+
+###Compare variance:
+
+The simulation variance is calculated:
+```{r}
+var(means)
+```
+
+The theoretical population variance is (1/lambda)^2=25.  The theoretical sample variance is popluation variance/sqrt(n) or 25/40=.625.  As we can, see the variances match up well.
+
+###Show distribution is relatively normal:
+
+I plot the histogram of the simulation and create a normal distribution that should theoretically match with the histogram.  We see that the simulation matches theory well.
+
+```{r}
+x=seq(2,8,.1)
+hist(means,20)
+lines(x,1000/5*dnorm(x,mean=mean(means),sd=sd(means)),col="red")
+```
+
+### coverage of confidence interval
+
+We look at the confidence interval:
+```{r}
+range=c(-1,1)*1.96*(1/lambda)/sqrt(n)+mean(means)
+coverage=sum(means>=range[1] & means<=range[2])
+coverage/m*100
+```
+
+Notice that the coverage matches the theoretical coverage of 95% well.
+
+##Problem 2:
+
+Let's load the data first.
+
+```{r}
+data(ToothGrowth)
+data=ToothGrowth
+```
+
+###Exploratory Analysis:
+
+Below, is a histogram of lengths for various dosages and supplements.
+
+```{r}
+library(ggplot2)
+ggplot(data,aes(x=len))+geom_histogram(binwidth=2)+facet_grid(dose~supp)+ggtitle("Length histogram for different dosages and supp")
+```
+
+Below, we see the means of the data for various dosages and supplements.
+```{r}
+tapply(data$len,list(data$supp,data$dose),mean)
+```
+
+From the exploratory analysis, we see that length tends to increase with dosage, and OJ seems to have a larger effect than VC.
+
+###Summary of data
+```{r}
+summary(data)
+```
+
+We see taht there are 2 types of supplements, with 30 data points each.  W also see taht the mean length is around 19.  Also, dose ranges from .5 to 2.
+
+###OJ versus VC Inference Analysis:
+
+We will look at OJ versus VC for each dose: .5,1, and 2. We will calculate the two-tail p-value and 95% 2-tail confidence interval for each dose.
+
+```{r}
+OJ=subset(data$len,data$supp=="OJ"&data$dose==.5)
+VC=subset(data$len,data$supp=="VC"&data$dose==.5)
+p_val.5=t.test(OJ,VC,var.equal=FALSE)$p.value
+conf.int.5=t.test(OJ,VC,var.equal=FALSE)$conf.int
+p_val.5
+conf.int.5
+
+OJ=subset(data$len,data$supp=="OJ"&data$dose==1)
+VC=subset(data$len,data$supp=="VC"&data$dose==1)
+p_val1=t.test(OJ,VC,var.equal=FALSE)$p.value
+conf.int1=t.test(OJ,VC,var.equal=FALSE)$conf.int
+p_val1
+conf.int1
+
+OJ=subset(data$len,data$supp=="OJ"&data$dose==2)
+VC=subset(data$len,data$supp=="VC"&data$dose==2)
+p_val2=t.test(OJ,VC,var.equal=FALSE)$p.value
+conf.int2=t.test(OJ,VC,var.equal=FALSE)$conf.int
+p_val2
+conf.int2
+```
+
+##Results and Analysis:
+
+Given alpha=.05 for a two-tailed p value test, we see that OJ increases length more than VC for both .5 and 1 dosages.  For dose 2, we accept the null hypothesis.  We see that the 95% confidence intervals also confirm this in that the intervals for .5 and 1 doses are completely positive whereas dose 2 ranges from negative to positive values. We can also account for the multiple hypothesis tests by dividing alpha by 3, but this would still have the first 2 p-values within our alpha limit, so it doesn't change our results.

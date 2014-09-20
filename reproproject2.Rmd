@@ -1,0 +1,118 @@
+#Title
+
+##Synopsis
+
+##Data Processing:
+
+I first downloaded the data and read it into a dataframe in R.
+```{r, cache=TRUE}
+setwd("C:/Users/Michael/Documents")
+temp<-tempfile()
+download.file("http://d396qusza40orc.cloudfront.net/repdata%2Fdata%2FStormData.csv.bz2",temp)
+data<-read.csv(bzfile(temp))
+unlink(temp)
+```
+
+```{r,}
+options(rpubs.upload.method = "internal")
+```
+
+###Question 1: Effect on Human Health
+
+We will look at fatalities and casualties.  I will make a casualties column by adding the fatalities and injuries together.
+
+```{r,}
+data$CASUALTIES=data$FATALITIES+data$INJURIES
+```
+
+####Fatalities:
+First, we look at total fatalities due to different event types over the course of the data set.
+
+```{r,}
+fatalities=with(data,tapply(FATALITIES,EVTYPE,sum,na.rm=TRUE))
+fatalities=sort(fatalities,decreasing=TRUE)
+top_events=sum(fatalities>300)
+sum(fatalities>300)
+```
+The total number of events with over 300 fatalities over the course of the dataset is `r sum(fatalities>300)` types of events.
+```{r,}
+fatalities[1:top_events]
+```
+Also, the top most fatal event types are listed above.  Notice event type tornado is the most fatal, followed by excesssive heat.
+
+
+I will make a barplot printing out the `r sum(fatalities>300)` deadliest event types and their percent fatalities over total fatalities.
+
+```{r,}
+percent_fatalities=fatalities/sum(fatalities)*100
+barplot(percent_fatalities[1:top_events],names.arg=names(percent_fatalities[1:top_events]),xlab="EVENT TYPE",ylab="Percent Fatalities",main="Percent Fatalities of Deadliest Event Types")
+sum(percent_fatalities[1:top_events])
+```
+Notice that tornadoes account for around `r percent_fatalities[1]`% of total fatalities. These "Deadliest Events" account for a total of `r sum(percent_fatalities[1:top_events])`% of all fatalities.
+
+####Casualties:
+Now, let's do a similar treatment on Casualties.
+
+First, we look at total casualties due to different event types over the course of the data set.
+
+```{r,}
+casualties=with(data,tapply(CASUALTIES,EVTYPE,sum,na.rm=TRUE))
+casualties=sort(casualties,decreasing=TRUE)
+top_events=sum(casualties>2000)
+sum(casualties>2000)
+```
+There are `r sum(casualties>2000)` types of events with over 2000 casualties over the course of the dataset.
+```{r,}
+casualties[1:top_events]
+```
+Also, the top most fatal event types are listed above.  Notice event type tornado is the most fatal, followed by excesssive heat.
+
+
+I will make a barplot printing out the `r sum(casualties>2000)` deadliest event types and their percent casualties over total casualties.
+
+```{r,}
+percent_casualties=casualties/sum(casualties)*100
+barplot(percent_casualties[1:top_events],names.arg=names(percent_casualties[1:top_events]),xlab="EVENT TYPE",ylab="Percent Casualties",main="Percent Casualties of Deadliest Event Types")
+sum(percent_casualties[1:top_events])
+```
+Notice that tornadoes account for around `r percent_casualties[1]`% of total casualties. These "Deadliest Events" account for a total of `r sum(percent_casualties[1:top_events])`% of all casualties.
+
+###Question 2: Property Damage
+
+To figure out which events cause the most damage, we will only consider cases where the reported property damage was in the thousands, millions, or billions.
+
+First, I clean up the data, and make sure PROPDMG variable shows damage in number of dollars.  Then I sort the events in descending property damage cost.
+
+```{r,}
+data$PROPDMG=ifelse(data$PROPDMGEXP=="K",data$PROPDMG*1000,data$PROPDMG)
+data$PROPDMG=ifelse(data$PROPDMGEXP=="M",data$PROPDMG*1000000,data$PROPDMG)
+data$PROPDMG=ifelse(data$PROPDMGEXP=="B",data$PROPDMG*1000000000,data$PROPDMG)
+
+damage=with(data,tapply(PROPDMG,EVTYPE,sum,na.rm=TRUE))
+damage=sort(damage,decreasing=TRUE)
+```
+
+Let's look at the top 8 events since they seem to encompass a decent portion of the damage shown.
+
+```{r,}
+top_events=8
+sum(damage[1:top_events])/sum(damage)*100
+```
+Notice that the top 8 events amount to around `r sum(damage[1:top_events])/sum(damage)*100`% of the total cost in damage.
+
+The top 8 events are shown below.  Notice that floods actually account for the most amount of damage.
+```{r,}
+damage[1:top_events]
+```
+
+Let's plot the top 8 events on a bar plot, showing percent total cost in damage.
+
+```{r,}
+percent_damage=damage/sum(damage)*100
+barplot(percent_damage[1:top_events],names.arg=names(percent_damage[1:top_events]),ylim=round(range(percent_damage)),xlab="EVENT TYPE",ylab="Percent Property Damage in Dollars",main="Highest Property Damage in Dollars by Event Types")
+
+```
+
+##Results:
+
+As you can see from the analysis, most of the effects on human life and property damage and be attributed to less than 10 event types.  Tornados seem to have the largest number of fatalities and casualties, with extreme heat coming in second.  As for property damage, the largest contributor is from floods.
